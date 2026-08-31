@@ -1,0 +1,50 @@
+services:
+  frontend:
+    image: alpine:3.21
+    container_name: frontend
+    command: sh -c "apk add --no-cache iputils >/dev/null && tail -f /dev/null"
+    networks:
+      - frontend-network
+
+  backend:
+    image: alpine:3.21
+    container_name: backend
+    command: sh -c "apk add --no-cache iputils busybox-extras >/dev/null && tail -f /dev/null"
+    networks:
+      - frontend-network
+      - database-network
+
+  db:
+    image: mysql:8.4
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: homework
+    networks:
+      - database-network
+      - isolated-network
+
+  apache-host:
+    image: httpd:2.4
+    container_name: apache-host
+    network_mode: host
+    profiles:
+      - host-network
+
+  nginx-bind-mount:
+    image: nginx:alpine
+    container_name: nginx-bind-mount
+    ports:
+      - "8081:80"
+    volumes:
+      - ./bind-mount-site:/usr/share/nginx/html:ro
+    profiles:
+      - bind-mount
+
+networks:
+  frontend-network:
+    name: frontend-network
+  database-network:
+    name: database-network
+  isolated-network:
+    name: isolated-network
