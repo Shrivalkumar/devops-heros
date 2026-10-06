@@ -11,7 +11,7 @@ permissions:
 
 env:
   APP_DIR: session-17-devsecops/demo
-  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/session17-devsecops
+  IMAGE_NAME: ghcr.io/shrivalkumar/session17-devsecops
 
 jobs:
   test:
