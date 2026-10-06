@@ -1,0 +1,11 @@
+groups:
+  - name: session20-demo-alerts
+    rules:
+      - alert: DemoTargetDown
+        expr: up{job="unhealthy-demo"} == 0
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Intentional demo target is unavailable"
+          description: "The unreachable target is present solely to demonstrate Prometheus alert evaluation."
