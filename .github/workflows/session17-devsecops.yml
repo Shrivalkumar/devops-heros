@@ -92,7 +92,7 @@ jobs:
       - name: Build image for scanning
         run: docker build --tag session17-devsecops:${{ github.sha }} $APP_DIR
       - name: Scan critical vulnerabilities
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: session17-devsecops:${{ github.sha }}
           format: table
