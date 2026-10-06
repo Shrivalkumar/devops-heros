@@ -1,0 +1,88 @@
+name: Session 16 CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-16-github-actions/10-final-cicd-pipeline
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -v
+
+  build:
+    name: Build and Package
+    needs: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-16-github-actions/10-final-cicd-pipeline
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build application
+        run: bash build.sh
+      - name: Build Docker image
+        run: docker build --tag session16-calculator:${{ github.sha }} .
+      - name: Record image metadata
+        run: |
+          docker image inspect session16-calculator:${{ github.sha }} \
+            --format 'Image: {{.RepoTags}}%nId: {{.Id}}%nCreated: {{.Created}}' \
+            > build/image-info.txt
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-build
+          path: session-16-github-actions/10-final-cicd-pipeline/build/
+
+  security-check:
+    name: Security Check
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check for common sensitive files
+        run: |
+          if find session-16-github-actions/10-final-cicd-pipeline -type f \( -name '.env' -o -name '*.pem' -o -name '*.key' \) | grep -q .; then
+            echo 'Potential sensitive file found.'
+            exit 1
+          fi
+          echo 'No common sensitive files found.'
+
+  deliver:
+    name: Deliver Deployment Package
+    needs: [build, security-check]
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_TOKEN: ${{ secrets.DEMO_DEPLOY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v5
+        with:
+          name: calculator-build
+          path: build
+      - name: Prepare deployment package
+        run: |
+          mkdir delivery
+          cp session-16-github-actions/10-final-cicd-pipeline/deploy/deployment.yaml delivery/
+          cp build/image-info.txt delivery/
+          printf 'Commit: %s\nDelivery status: READY\n' "$GITHUB_SHA" > delivery/release-info.txt
+      - name: Check protected deployment credential
+        run: |
+          if [ -n "$DEPLOY_TOKEN" ]; then echo 'Protected credential configured.'; else echo 'Delivery package created; no external deployment configured.'; fi
+      - name: Upload deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-delivery-package
+          path: delivery/
