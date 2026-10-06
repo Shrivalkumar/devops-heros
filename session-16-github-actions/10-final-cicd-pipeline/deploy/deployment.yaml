@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session16-calculator
+  labels:
+    app: session16-calculator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: session16-calculator
+  template:
+    metadata:
+      labels:
+        app: session16-calculator
+    spec:
+      containers:
+        - name: calculator
+          image: ghcr.io/OWNER/session16-calculator:TAG
+          imagePullPolicy: IfNotPresent
