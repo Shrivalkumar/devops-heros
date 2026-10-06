@@ -147,6 +147,12 @@ Session 16 CI/CD Pipeline
 
 ---
 
+## Successful GitHub Actions execution
+
+The workflow was pushed to the repository and completed successfully in **43 seconds**. All four jobs passed and GitHub published both the build and delivery artifacts.
+
+![Successful Session 16 GitHub Actions workflow](screenshots/github-actions-success.png)
+
 ## 11. Failure Scenario
 Break the application intentionally:
 ```python
