@@ -29,6 +29,20 @@ Kubernetes
 Application
 ```
 
+## Completed live GitOps demonstration
+
+The manifests in this project were committed to `Shrivalkumar/devops-heros`. Argo CD in the local `kind-session20` cluster read that Git revision, deployed the Nginx workload with two replicas, and reported the Application as `Synced` and `Healthy`.
+
+The self-healing check was also run: the Deployment was manually scaled to one replica, then Argo CD restored the Git-declared two replicas. This proves the central GitOps idea: Git is the desired state and the reconciler corrects cluster drift.
+
+### Application status, pods, and logs
+
+![Argo CD synchronized application, ready pods, and logs](screenshots/01-argocd-sync-app-logs.png)
+
+### Drift and reconciliation
+
+![Argo CD self-healing after a manual scale change](screenshots/02-gitops-self-healing.png)
+
 ---
 
 # Requirements

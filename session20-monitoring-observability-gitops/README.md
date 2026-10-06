@@ -31,3 +31,11 @@ Git commit → Git repository (desired state) → Argo CD reconciliation → Kub
 ```
 
 The GitOps demo uses automated sync, pruning, and self-healing. A manual scale change is drift; Argo CD restores the committed replica count.
+
+## Completed execution
+
+- Prometheus and Grafana were started locally with Docker Compose.
+- Prometheus health, target availability, CPU, memory, alert evaluation, and logs were checked.
+- A dedicated Kind cluster named `session20` was created and Argo CD was installed.
+- Argo CD synchronized the Git-tracked Nginx application to a healthy two-replica Deployment.
+- A manual replica change was automatically corrected by Argo CD self-healing.

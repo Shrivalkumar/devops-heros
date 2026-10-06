@@ -24,6 +24,12 @@ Prometheus is available at `http://localhost:9090` and Grafana at `http://localh
 
 The unavailable target is deliberately artificial and exists only for the alerting exercise. In a real system, an alert would notify a person or incident-management integration such as Alertmanager, Slack, or PagerDuty.
 
+## Live run evidence
+
+The running Prometheus target returned `up = 1` and the `/-/healthy` endpoint returned healthy. The run also captured process CPU time, resident memory, Docker CPU/memory use, and the firing `DemoTargetDown` alert.
+
+![Prometheus health, metrics, alert, CPU, and memory](screenshots/01-monitoring-health-metrics-alert.png)
+
 ## Stop
 
 ```bash
