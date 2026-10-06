@@ -72,4 +72,6 @@ For every workflow run, the deploy job creates a short-lived Kind cluster inside
 
 ## Screenshot evidence
 
-The successful GitHub Actions run is saved in `screenshots/` after the workflow completes.
+The pipeline completed successfully in GitHub Actions. The successful run shows every required job passing: tests, SAST, SCA, secret scan, Docker build, image scan, security gate, registry push, and Kubernetes deployment.
+
+![Successful Session 17 DevSecOps pipeline](screenshots/github-actions-success.png)
