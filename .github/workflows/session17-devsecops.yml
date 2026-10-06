@@ -1,0 +1,155 @@
+name: Session 17 DevSecOps Pipeline
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  APP_DIR: session-17-devsecops/demo
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/session17-devsecops
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-17-devsecops/demo
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run unit tests
+        run: pytest -q
+
+  sast:
+    name: SAST
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-17-devsecops/demo
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install Bandit
+        run: python -m pip install bandit[toml]
+      - name: Scan Python source
+        run: bandit -r app -c bandit.yaml -ll
+
+  sca:
+    name: SCA
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-17-devsecops/demo
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install dependency scanner
+        run: python -m pip install pip-audit
+      - name: Audit Python dependencies
+        run: pip-audit -r requirements.txt
+
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Scan repository for exposed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-build:
+    name: Docker Build
+    needs: [test, sast, sca, secret-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image
+        run: docker build --tag session17-devsecops:${{ github.sha }} $APP_DIR
+
+  image-scan:
+    name: Container Image Scan
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image for scanning
+        run: docker build --tag session17-devsecops:${{ github.sha }} $APP_DIR
+      - name: Scan critical vulnerabilities
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: session17-devsecops:${{ github.sha }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: CRITICAL
+
+  security-gate:
+    name: Security Gate
+    needs: [sast, sca, secret-scan, image-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm all security checks passed
+        run: |
+          echo 'SAST passed.'
+          echo 'SCA passed.'
+          echo 'Secret scan passed.'
+          echo 'Container image scan passed.'
+          echo 'Security gate passed. Image can be published.'
+
+  push-image:
+    name: Push Image to Registry
+    needs: security-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push image
+        run: |
+          docker build --tag $IMAGE_NAME:${{ github.sha }} --tag $IMAGE_NAME:latest $APP_DIR
+          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:latest
+
+  deploy:
+    name: Deploy to Kubernetes
+    needs: push-image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Create temporary Kind cluster
+        uses: helm/kind-action@v1.12.0
+        with:
+          cluster_name: session17
+      - name: Build and load image into Kind
+        run: |
+          docker build --tag session17-devsecops:${{ github.sha }} $APP_DIR
+          kind load docker-image session17-devsecops:${{ github.sha }} --name session17
+      - name: Deploy manifests
+        run: |
+          sed "s/IMAGE_TAG/${{ github.sha }}/" $APP_DIR/k8s/deployment.yaml | kubectl apply -f -
+          kubectl apply -f $APP_DIR/k8s/service.yaml
+      - name: Verify Kubernetes rollout
+        run: |
+          kubectl rollout status deployment/session17-python --timeout=90s
+          kubectl get deployment,pods,service
