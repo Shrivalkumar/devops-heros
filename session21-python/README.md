@@ -103,7 +103,21 @@ I kept deliberate broken-image and broken-service manifests in `troubleshooting/
 
 ## Evidence and lessons learned
 
-The exact commands used for my terminal evidence are stored in `evidence/`; their output came from the live Docker and Kind validation, not mocked output. I learned that a pipeline is only one part of deployment: service discovery, readiness, image availability, secrets, storage, and reconciliation must all line up.
+The exact commands used for my terminal evidence are stored in `evidence/`; their output came from the live Docker and Kind validation, not mocked output.
+
+### Docker tests, health, and metrics
+
+![Docker Compose backend tests, health endpoint, and Prometheus metrics](screenshots/01-docker-tests-metrics.png)
+
+I ran the API tests inside the backend container, then checked the health endpoint and the first Prometheus metric lines.
+
+### Helm release and Kubernetes resources
+
+![Running TaskBoard pods with Helm-managed ConfigMaps and Secrets](screenshots/02-helm-kubernetes.png)
+
+This capture shows two API replicas, two frontend replicas, and PostgreSQL running after the Helm release. It also shows the Helm-managed ConfigMaps and PostgreSQL Secret.
+
+I learned that a pipeline is only one part of deployment: service discovery, readiness, image availability, secrets, storage, and reconciliation must all line up.
 
 I remove temporary lab resources when finished:
 
