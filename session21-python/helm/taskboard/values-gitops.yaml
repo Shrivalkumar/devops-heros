@@ -1,0 +1,16 @@
+# These image names are used by the local Kind validation and can be replaced
+# with the immutable GHCR tags produced by the CI workflow in a shared cluster.
+backend:
+  image: session21-python-backend
+  tag: latest
+frontend:
+  image: session21-python-frontend
+  tag: latest
+imagePullPolicy: IfNotPresent
+ingress:
+  enabled: false
+hpa:
+  enabled: false
+monitoring:
+  serviceMonitor:
+    enabled: false
