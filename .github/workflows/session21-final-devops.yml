@@ -90,7 +90,9 @@ jobs:
 
   deploy:
     needs: build_scan_push
-    if: github.ref == 'refs/heads/main' && secrets.KUBE_CONFIG_DATA != ''
+    # Enable this only after adding KUBE_CONFIG_DATA and the DEPLOY_TO_KUBERNETES
+    # repository variable. Pull requests still exercise every earlier security gate.
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_TO_KUBERNETES == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
