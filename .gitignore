@@ -1,0 +1,11 @@
+# Generated local dependencies, test caches, and Terraform state stay local.
+**/.terraform/
+**/.pytest_cache/
+**/__pycache__/
+**/venv/
+**/path/to/venv/
+**/*.py[cod]
+**/.coverage
+**/*.tfstate
+**/*.tfstate.*
+**/tfplan

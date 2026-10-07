@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "devops-heroes-chart.fullname" . }}-site
+  labels:
+    {{- include "devops-heroes-chart.labels" . | nindent 4 }}
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="en">
+      <head><meta charset="utf-8"><title>{{ .Values.application.title }}</title></head>
+      <body>
+        <h1>{{ .Values.application.title }}</h1>
+        <p>{{ .Values.application.message }}</p>
+        <p>Release: {{ .Release.Name }} | Namespace: {{ .Release.Namespace }}</p>
+      </body>
+    </html>
