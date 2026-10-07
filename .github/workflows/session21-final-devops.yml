@@ -95,7 +95,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
-      - name: Configure kubectl from the protected repository secret
+      - name: "Configure kubectl from the protected repository secret"
         env: {KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}}
         run: mkdir -p ~/.kube && echo "$KUBE_CONFIG_DATA" | base64 -d > ~/.kube/config
       - name: Deploy with Helm
