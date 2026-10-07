@@ -59,7 +59,7 @@ The normal chart keeps HPA and ServiceMonitor enabled for a monitored cluster. I
 
 ## Terraform infrastructure
 
-`terraform/` contains the AWS VPC and EKS definition, variables, outputs, and module configuration. I formatted and validated it, but did not run `terraform apply`: EKS and NAT Gateway can create AWS charges.
+`terraform/` contains the AWS VPC and EKS definition, variables, outputs, and module configuration. I did not run `terraform apply`: EKS and NAT Gateway can create AWS charges. Terraform is not installed in this workspace, so I left the validation commands below as the safe next step on a machine with Terraform installed.
 
 ```bash
 cd terraform
