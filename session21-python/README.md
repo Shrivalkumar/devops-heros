@@ -111,6 +111,12 @@ The exact commands used for my terminal evidence are stored in `evidence/`; thei
 
 I ran the API tests inside the backend container, then checked the health endpoint and the first Prometheus metric lines.
 
+### Running TaskBoard application
+
+![TaskBoard dashboard running in the browser](screenshots/03-taskboard-application.png)
+
+This is the TaskBoard dashboard served by the Docker Compose frontend after the API and database were running.
+
 ### Helm release and Kubernetes resources
 
 ![Running TaskBoard pods with Helm-managed ConfigMaps and Secrets](screenshots/02-helm-kubernetes.png)
